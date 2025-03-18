@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD User với API</title>
+    <script>
+        const API_URL = "https://67d78acc9d5e3a10152b179b.mockapi.io/Nghia/users";
+
+        async function hienThiDanhSach() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Lỗi khi lấy dữ liệu");
+                const users = await response.json();
+                let danhSachHTML = "<table border='1'><tr><th>ID</th><th>Tên</th><th>Hành động</th></tr>";
+                users.forEach(user => {
+                    danhSachHTML += `<tr><td>${user.id}</td><td>${user.name}</td><td>
+                        <button onclick="sua('${user.id}', '${user.name}')">Sửa</button>
+                        <button onclick="xoa('${user.id}')">Xóa</button></td></tr>`;
+                });
+                danhSachHTML += "</table>";
+                document.getElementById("danhSach").innerHTML = danhSachHTML;
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách:", error);
+            }
+        }
+
+        async function them() {
+            let name = document.getElementById("name").value.trim();
+            if (name) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name })
+                    });
+                    if (!response.ok) throw new Error("Lỗi khi thêm người dùng");
+                    document.getElementById("name").value = "";
+                    await hienThiDanhSach();
+                } catch (error) {
+                    console.error("Lỗi khi thêm người dùng:", error);
+                }
+            } else {
+                alert("Tên không được để trống");
+            }
+        }
+        
+        async function sua(id, oldName) {
+            let newName = prompt("Nhập tên mới:", oldName);
+            if (newName && newName.trim() !== "") {
+                try {
+                    const response = await fetch(`${API_URL}/${id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: newName.trim() })
+                    });
+                    if (!response.ok) throw new Error("Lỗi khi sửa người dùng");
+                    await hienThiDanhSach();
+                } catch (error) {
+                    console.error("Lỗi khi sửa người dùng:", error);
+                }
+            }
+        }
+        
+        async function xoa(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
+                try {
+                    const response = await fetch(`${API_URL}/${id}`, {
+                        method: "DELETE"
+                    });
+                    if (!response.ok) throw new Error("Lỗi khi xóa người dùng");
+                    await hienThiDanhSach();
+                } catch (error) {
+                    console.error("Lỗi khi xóa người dùng:", error);
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", hienThiDanhSach);
+    </script>
+</head>
+<body>
+    <h2>CRUD User với API</h2>
+    <form id="crudForm" onsubmit="return false;">
+        <label for="name">Tên:</label>
+        <input type="text" id="name" name="name" required>
+        <br><br>
+        <button type="button" onclick="them()">Thêm</button>
+    </form>
+    <h3>Danh Sách Người Dùng</h3>
+    <div id="danhSach"></div>
+</body>
+</html>
