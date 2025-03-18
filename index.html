@@ -4,15 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD User với API</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
     <script>
-        const API_URL = "https://67d78acc9d5e3a10152b179b.mockapi.io/Nghia/users";
+        const API_URL = "https://67d78acc9d5e3a10152b179b.mockapi.io/Nghia/user";
 
-        async function hienThiDanhSach() {
+        async function capNhatDanhSach() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("Lỗi khi lấy dữ liệu");
+                if (!response.ok) throw new Error("Lỗi khi lấy danh sách người dùng");
                 const users = await response.json();
-                let danhSachHTML = "<table border='1'><tr><th>ID</th><th>Tên</th><th>Hành động</th></tr>";
+                let danhSachHTML = "<table><tr><th>ID</th><th>Tên</th><th>Hành động</th></tr>";
                 users.forEach(user => {
                     danhSachHTML += `<tr><td>${user.id}</td><td>${user.name}</td><td>
                         <button onclick="sua('${user.id}', '${user.name}')">Sửa</button>
@@ -27,60 +41,61 @@
 
         async function them() {
             let name = document.getElementById("name").value.trim();
-            if (name) {
-                try {
-                    const response = await fetch(API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name })
-                    });
-                    if (!response.ok) throw new Error("Lỗi khi thêm người dùng");
-                    document.getElementById("name").value = "";
-                    await hienThiDanhSach();
-                } catch (error) {
-                    console.error("Lỗi khi thêm người dùng:", error);
-                }
-            } else {
+            if (!name) {
                 alert("Tên không được để trống");
+                return;
             }
-        }
-        
-        async function sua(id, oldName) {
-            let newName = prompt("Nhập tên mới:", oldName);
-            if (newName && newName.trim() !== "") {
-                try {
-                    const response = await fetch(`${API_URL}/${id}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name: newName.trim() })
-                    });
-                    if (!response.ok) throw new Error("Lỗi khi sửa người dùng");
-                    await hienThiDanhSach();
-                } catch (error) {
-                    console.error("Lỗi khi sửa người dùng:", error);
-                }
-            }
-        }
-        
-        async function xoa(id) {
-            if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
-                try {
-                    const response = await fetch(`${API_URL}/${id}`, {
-                        method: "DELETE"
-                    });
-                    if (!response.ok) throw new Error("Lỗi khi xóa người dùng");
-                    await hienThiDanhSach();
-                } catch (error) {
-                    console.error("Lỗi khi xóa người dùng:", error);
-                }
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name })
+                });
+                if (!response.ok) throw new Error("Lỗi khi thêm người dùng");
+                document.getElementById("name").value = "";
+                capNhatDanhSach();
+            } catch (error) {
+                console.error("Lỗi khi thêm người dùng:", error);
             }
         }
 
-        document.addEventListener("DOMContentLoaded", hienThiDanhSach);
+        async function sua(id, oldName) {
+            let newName = prompt("Nhập tên mới:", oldName);
+            if (!newName || newName.trim() === "") {
+                alert("Tên không hợp lệ");
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: newName.trim() })
+                });
+                if (!response.ok) throw new Error("Lỗi khi sửa người dùng");
+                capNhatDanhSach();
+            } catch (error) {
+                console.error("Lỗi khi sửa người dùng:", error);
+            }
+        }
+
+        async function xoa(id) {
+            if (!confirm("Bạn có chắc chắn muốn xóa người dùng này?")) return;
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: "DELETE"
+                });
+                if (!response.ok) throw new Error("Lỗi khi xóa người dùng");
+                capNhatDanhSach();
+            } catch (error) {
+                console.error("Lỗi khi xóa người dùng:", error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", capNhatDanhSach);
     </script>
 </head>
 <body>
-    <h2>CRUD User với API</h2>
+    <h2>Nhóm 17 Thứ 3 Ca1 </h2>
     <form id="crudForm" onsubmit="return false;">
         <label for="name">Tên:</label>
         <input type="text" id="name" name="name" required>
@@ -91,3 +106,67 @@
     <div id="danhSach"></div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Form</title>
+    <script>
+        let danhSach = [];
+
+        function hienThiDanhSach() {
+            let danhSachHTML = "";
+            danhSach.forEach((item, index) => {
+                danhSachHTML += `<li>${item} <button onclick="sua(${index})">Sửa</button> <button onclick="xoa(${index})">Xóa</button></li>`;
+            });
+            document.getElementById("danhSach").innerHTML = danhSachHTML;
+        }
+
+        function them() {
+            let name = document.getElementById("name").value;
+            if (name) {
+                danhSach.push(name);
+                document.getElementById("name").value = "";
+                hienThiDanhSach();
+            }
+        }
+        
+        function sua(index) {
+            let newName = prompt("Nhập tên mới:", danhSach[index]);
+            if (newName) {
+                danhSach[index] = newName;
+                hienThiDanhSach();
+            }
+        }
+        
+        function xoa(index) {
+            danhSach.splice(index, 1);
+            hienThiDanhSach();
+        }
+    </script>
+</head>
+<body>
+    <h2>Form CRUD</h2>
+    <form id="crudForm" onsubmit="return false;">
+        <label for="name">Tên:</label>
+        <input type="text" id="name" name="name" required>
+        <br><br>
+        <button type="button" onclick="them()">Thêm</button>
+    </form>
+    <h3>Danh Sách</h3>
+    <ul id="danhSach"></ul>
+</body>
+</html> -->
